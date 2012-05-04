@@ -30,7 +30,7 @@ public abstract class Neo4jGraphAlgorithms {
 		node_2.createRelationshipTo(node_3, null);
 		
 		//Dijkstra shortest_path = new Dijkstra();
-		Dijkstra dijkstra = GraphAlgoFactory.dijkstra(null, null);
+		//Dijkstra dijkstra = GraphAlgoFactory.dijkstra(null, null);
 	}
 
 }
