@@ -1,0 +1,15 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>de.triagens</groupId>
+  <artifactId>neo4j-graph-algorithms</artifactId>
+  <version>0.0.1-SNAPSHOT</version>
+  <name>Neo4j Graph Algorithms</name>
+  <description>Version of the Graph Algorithms using Standard Neo4j implementation for comparison with my AvocadoDB implementations.</description>
+  <dependencies>
+  	<dependency>
+  		<groupId>org.neo4j</groupId>
+  		<artifactId>neo4j-graph-algo</artifactId>
+  		<version>1.7</version>
+  	</dependency>
+  </dependencies>
+</project>
