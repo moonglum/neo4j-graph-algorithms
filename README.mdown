@@ -1,0 +1,3 @@
+# Neo4j Experiments
+
+*Experiments with Neo4j for my bachelor thesis*
