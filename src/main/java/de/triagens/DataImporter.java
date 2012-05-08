@@ -10,9 +10,9 @@ public class DataImporter {
 	DijkstraTest dijkstra;
 	
 	public DataImporter(String base_directory, DijkstraTest dijkstra) {
-		String vertices_file = base_directory + "/vertices.csv";
-		String edges_file = base_directory + "/edges.csv";
-		String test_file = base_directory + "/tests.csv";
+		String vertices_file = base_directory + "/generated_vertices.csv";
+		String edges_file = base_directory + "/generated_edges.csv";
+		String test_file = base_directory + "/generated_testcases.csv";
 		
 		this.dijkstra = dijkstra;
 		
@@ -35,7 +35,7 @@ public class DataImporter {
 
 			fstream.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("Edgefile not found");
+			System.out.println("Vertexfile not found");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -77,7 +77,7 @@ public class DataImporter {
 
 			fstream.close();
 		} catch (FileNotFoundException e) {
-			System.out.println("Edgefile not found");
+			System.out.println("TestcaseFile not found");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
