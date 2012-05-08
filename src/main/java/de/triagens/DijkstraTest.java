@@ -1,4 +1,7 @@
 package de.triagens;
+import java.io.BufferedWriter;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -22,11 +25,13 @@ public class DijkstraTest {
 	Transaction tx;
 	PathFinder<WeightedPath> dijkstraPathFinder;
 	Map<String,Long> node_mapper;
+	ArrayList<Node[]> test_cases;
 	
 	public DijkstraTest(String dbname) {
 		graphdb = new EmbeddedGraphDatabase(dbname);
 		tx = graphdb.beginTx();
 		node_mapper = new HashMap<String,Long>();
+		test_cases = new ArrayList<Node[]>();
 		
 		RelationshipExpander expander = Traversal.expanderForTypes(MyRelationshipType.REL, Direction.BOTH );
 		CostEvaluator<Double> costEvaluator = CommonEvaluators.doubleCostEvaluator( "cost" );
@@ -52,17 +57,40 @@ public class DijkstraTest {
 		return edge;
 	}
 	
-	public String shortestPathes(String from_name, String to_name) {
+	public void addTest(String from_name, String to_name) {
 		Node from = graphdb.getNodeById(node_mapper.get(from_name));
 		Node to = graphdb.getNodeById(node_mapper.get(to_name));
 		
+		Node[] node_tuple = new Node[2];
+		node_tuple[0] = from;
+		node_tuple[1] = to;
+		test_cases.add(node_tuple);
+	}
+	
+	public void runTests(BufferedWriter logger) throws IOException {
+		Iterator<Node[]> iterator = test_cases.iterator();
+		
+		while(iterator.hasNext()) {
+			Node[] node_tuple = iterator.next();
+			logger.append(shortestPathes(node_tuple[0], node_tuple[1]));
+		}
+	}
+	
+	private String shortestPathes(Node from, Node to) {
 		Iterator<WeightedPath> iterator = dijkstraPathFinder.findAllPaths(from, to).iterator();
 		
 		String my_pathes = "";
 		
 		while(iterator.hasNext()) {
-			WeightedPath a = iterator.next();
-			my_pathes = my_pathes.concat(a.toString());
+			Iterator<Node> my_path = iterator.next().nodes().iterator();
+			
+			while(my_path.hasNext()) {
+				my_pathes = my_pathes.concat(my_path.next().getProperty("name").toString());
+				if (my_path.hasNext()) {
+					my_pathes = my_pathes.concat(",");
+				}
+			}
+			
 			my_pathes = my_pathes.concat("\n");
 		}
 		
