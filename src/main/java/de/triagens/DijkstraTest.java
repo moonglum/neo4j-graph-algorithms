@@ -1,5 +1,7 @@
 package de.triagens;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.neo4j.graphalgo.CommonEvaluators;
 import org.neo4j.graphalgo.CostEvaluator;
@@ -19,10 +21,12 @@ public class DijkstraTest {
 	GraphDatabaseService graphdb;
 	Transaction tx;
 	PathFinder<WeightedPath> dijkstraPathFinder;
+	Map<String,Long> node_mapper;
 	
 	public DijkstraTest(String dbname) {
 		graphdb = new EmbeddedGraphDatabase(dbname);
 		tx = graphdb.beginTx();
+		node_mapper = new HashMap<String,Long>();
 		
 		RelationshipExpander expander = Traversal.expanderForTypes(MyRelationshipType.REL, Direction.BOTH );
 		CostEvaluator<Double> costEvaluator = CommonEvaluators.doubleCostEvaluator( "cost" );
@@ -31,18 +35,27 @@ public class DijkstraTest {
 	
 	public Node addNode(String name) {
 		Node node = graphdb.createNode();
+		node_mapper.put(name, node.getId());
+		
 		node.setProperty("name", name);
 		return node;
 	}
 	
-	public Relationship addEdge(Node from, Node to) {
+	public Relationship addEdge(String name, String from_name, String to_name) {
+		Node from = graphdb.getNodeById(node_mapper.get(from_name));
+		Node to = graphdb.getNodeById(node_mapper.get(to_name));
+		
 		Relationship edge = from.createRelationshipTo(to, MyRelationshipType.REL);
+		edge.setProperty("name", name);
 		edge.setProperty("cost", 1);
 		
 		return edge;
 	}
 	
-	public String shortestPathesFor(Node from, Node to) {
+	public String shortestPathes(String from_name, String to_name) {
+		Node from = graphdb.getNodeById(node_mapper.get(from_name));
+		Node to = graphdb.getNodeById(node_mapper.get(to_name));
+		
 		Iterator<WeightedPath> iterator = dijkstraPathFinder.findAllPaths(from, to).iterator();
 		
 		String my_pathes = "";
