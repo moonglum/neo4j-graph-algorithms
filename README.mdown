@@ -1,3 +1,3 @@
-# Neo4j Experiments
+# Neo4j Graph Algorithms
 
-*Experiments with Neo4j for my bachelor thesis*
+*Running Graph Algorithms in Neo4j for my Bachelor Thesis*
