@@ -67,13 +67,26 @@ public class DijkstraTest {
 		test_cases.add(node_tuple);
 	}
 	
-	public void runTests(BufferedWriter logger) throws IOException {
+	public void runTestsWithLogger(BufferedWriter logger) throws IOException {
 		Iterator<Node[]> iterator = test_cases.iterator();
 		
 		while(iterator.hasNext()) {
 			Node[] node_tuple = iterator.next();
 			logger.append(shortestPathes(node_tuple[0], node_tuple[1]));
 		}
+	}
+	
+	public long runTestsWithTimer() {
+		Iterator<Node[]> iterator = test_cases.iterator();
+		
+		long start_time = System.currentTimeMillis(); 
+		while(iterator.hasNext()) {
+			Node[] node_tuple = iterator.next();
+			shortestPathes(node_tuple[0], node_tuple[1]);
+		}
+		long end_time = System.currentTimeMillis();
+		
+		return (end_time - start_time);
 	}
 	
 	private String shortestPathes(Node from, Node to) {
