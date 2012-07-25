@@ -1,4 +1,5 @@
 package de.triagens;
+
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -20,17 +21,17 @@ import org.neo4j.graphdb.Transaction;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.Traversal;
 
-public class DijkstraTest {
+public class GraphWrapper {
 	GraphDatabaseService graphdb;
 	Transaction tx;
 	PathFinder<WeightedPath> dijkstraPathFinder;
-	Map<String,Long> node_mapper;
+	Map<String,Long> vertex_mapper;
 	ArrayList<Node[]> test_cases;
 	
-	public DijkstraTest(String dbname) {
+	public GraphWrapper(String dbname) {
 		graphdb = new EmbeddedGraphDatabase(dbname);
 		tx = graphdb.beginTx();
-		node_mapper = new HashMap<String,Long>();
+		vertex_mapper = new HashMap<String,Long>();
 		test_cases = new ArrayList<Node[]>();
 		
 		RelationshipExpander expander = Traversal.expanderForTypes(MyRelationshipType.REL, Direction.BOTH );
@@ -38,17 +39,17 @@ public class DijkstraTest {
 		dijkstraPathFinder = GraphAlgoFactory.dijkstra( expander, costEvaluator );
 	}
 	
-	public Node addNode(String name) {
-		Node node = graphdb.createNode();
-		node_mapper.put(name, node.getId());
+	public Node addVertexWithName(String name) {
+		Node vertex = graphdb.createNode();
+		vertex_mapper.put(name, vertex.getId());
 		
-		node.setProperty("name", name);
-		return node;
+		vertex.setProperty("name", name);
+		return vertex;
 	}
 	
 	public Relationship addEdge(String name, String from_name, String to_name) {
-		Node from = graphdb.getNodeById(node_mapper.get(from_name));
-		Node to = graphdb.getNodeById(node_mapper.get(to_name));
+		Node from = graphdb.getNodeById(vertex_mapper.get(from_name));
+		Node to = graphdb.getNodeById(vertex_mapper.get(to_name));
 		
 		Relationship edge = from.createRelationshipTo(to, MyRelationshipType.REL);
 		edge.setProperty("name", name);
@@ -58,8 +59,8 @@ public class DijkstraTest {
 	}
 	
 	public void addTest(String from_name, String to_name) {
-		Node from = graphdb.getNodeById(node_mapper.get(from_name));
-		Node to = graphdb.getNodeById(node_mapper.get(to_name));
+		Node from = graphdb.getNodeById(vertex_mapper.get(from_name));
+		Node to = graphdb.getNodeById(vertex_mapper.get(to_name));
 		
 		Node[] node_tuple = new Node[2];
 		node_tuple[0] = from;
