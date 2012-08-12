@@ -90,6 +90,17 @@ public class GraphWrapper {
 		return (end_time - start_time);
 	}
 	
+	public void runEndlessTests() {
+		while (true) {
+			Iterator<Node[]> iterator = test_cases.iterator();
+			
+			while(iterator.hasNext()) {
+				Node[] node_tuple = iterator.next();
+				shortestPathes(node_tuple[0], node_tuple[1]);
+			}
+		}
+	}
+	
 	private String shortestPathes(Node from, Node to) {
 		Iterator<WeightedPath> iterator = dijkstraPathFinder.findAllPaths(from, to).iterator();
 		
@@ -115,4 +126,5 @@ public class GraphWrapper {
 		tx.finish();
 		graphdb.shutdown();
 	}
+
 }

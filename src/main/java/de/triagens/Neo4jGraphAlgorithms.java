@@ -22,11 +22,17 @@ public class Neo4jGraphAlgorithms {
 			startDijkstraWithLogger(graph_wrapper, folder_name + "/neo4j-dijkstra.csv");
 		} else if (task_name.equals("timer")) {
 			startDijkstraWithTimer(graph_wrapper);
+		} else if (task_name.equals("memory")) {
+			startDijkstraAsMemoryTest(graph_wrapper);
 		}
 		
 		graph_wrapper.close();
 	}
 	
+	private static void startDijkstraAsMemoryTest(GraphWrapper graph_wrapper) {
+		graph_wrapper.runEndlessTests();
+	}
+
 	public static void startDijkstraWithLogger(GraphWrapper graph_wrapper, String location) {
 		try {
 			FileWriter fstream = new FileWriter(location);
