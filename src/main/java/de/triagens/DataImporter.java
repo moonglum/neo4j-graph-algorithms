@@ -11,11 +11,13 @@ public class DataImporter {
 	String vertices_file;
 	String edges_file;
 	String test_file;
+	String payload_file;
 	
 	public DataImporter(String base_directory, GraphWrapper graph_wrapper) {
 		this.vertices_file = base_directory + "/generated_vertices.csv";
 		this.edges_file = base_directory + "/generated_edges.csv";
 		this.test_file = base_directory + "/generated_testcases.csv";
+		this.payload_file = base_directory + "/generated_payload.csv";
 		this.graph_wrapper = graph_wrapper;
 	}
 	
@@ -28,12 +30,33 @@ public class DataImporter {
 			br.readLine(); //Skip the first line
 			
 			while ((strLine = br.readLine()) != null) {
-				this.graph_wrapper.addVertexWithName(strLine);
+				this.graph_wrapper.addVertex(strLine);
 			}
 
 			fstream.close();
 		} catch (FileNotFoundException e) {
 			System.out.println("Vertexfile not found");
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+	}
+	
+	public void importPayload() {
+		try {
+			FileInputStream fstream = new FileInputStream(payload_file);
+			BufferedReader br = new BufferedReader(new InputStreamReader(fstream));
+			String strLine;
+			
+			br.readLine(); //Skip the first line
+			
+			while ((strLine = br.readLine()) != null) {
+				String[] a = strLine.split(",");
+				this.graph_wrapper.addVertex(a[0], a[1], Integer.valueOf(a[2]), a[3]);
+			}
+
+			fstream.close();
+		} catch (FileNotFoundException e) {
+			System.out.println("Payload File not found");
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

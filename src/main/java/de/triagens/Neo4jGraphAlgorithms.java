@@ -7,29 +7,64 @@ import java.io.IOException;
 public class Neo4jGraphAlgorithms {
 
 	public static void main(String[] args) {
-		String task_name = args[0];
-		String folder_name = args[1];
+		String type = args[0];
+		String task = args[1];
+		String folder_name = args[2];
+		GraphWrapper graph_wrapper = new GraphWrapper("/tmp/neo4j-graph-algorithms");
+		int times = 1;
+		
+		if (args.length == 4) {
+			times = Integer.parseInt(args[3]);
+		}
 		
 		System.out.println("Start: Import");
-		GraphWrapper graph_wrapper = new GraphWrapper("/tmp/neo4j-graph-algorithms");
+		if (task.equals("dijkstra")) {
+			importEntireGraph(folder_name, graph_wrapper);
+			System.out.println("Start: Processing");
+			if (type.equals("infinite")) {
+				startDijkstraAsInfiniteLoop(graph_wrapper);
+			} else if (type.equals("time")) {
+				startDijkstraWithTimer(graph_wrapper);
+			} else if (type.equals("results")) {
+				startDijkstraWithLogger(graph_wrapper, folder_name + "/neo4j-dijkstra.csv");
+			} else {
+				System.out.println("Abort! Unknown task type.");				
+			}
+		} else if (task.equals("payload")) {
+			importVerticesWithPayload(folder_name, graph_wrapper);
+			System.out.println("Start: Processing");
+			if (type.equals("infinite")) {
+				startPayloadAsInfiniteLoop(graph_wrapper);
+			} else if (type.equals("time")) {
+				startPayloadWithTimer(graph_wrapper, times);
+			} else if (type.equals("results")) {
+				System.out.println("Abort! Not implemented.");
+				System.exit(1);
+			} else {
+				System.out.println("Abort! Unknown task type.");				
+			}
+		} else {
+			System.out.println("Abort! Unknown task name.");
+			System.exit(1);
+		}
+				
+		graph_wrapper.close();
+		System.out.println("Done");
+	}
+	
+	public static void importEntireGraph(String folder_name, GraphWrapper graph_wrapper) {
 		DataImporter data_importer = new DataImporter(folder_name, graph_wrapper);
 		data_importer.importVertices();
 		data_importer.importEdges();
 		data_importer.importTestCases();
-		
-		System.out.println("Start: Processing");
-		if (task_name.equals("logger")) {
-			startDijkstraWithLogger(graph_wrapper, folder_name + "/neo4j-dijkstra.csv");
-		} else if (task_name.equals("timer")) {
-			startDijkstraWithTimer(graph_wrapper);
-		} else if (task_name.equals("memory")) {
-			startDijkstraAsMemoryTest(graph_wrapper);
-		}
-		
-		graph_wrapper.close();
 	}
 	
-	private static void startDijkstraAsMemoryTest(GraphWrapper graph_wrapper) {
+	public static void importVerticesWithPayload(String folder_name, GraphWrapper graph_wrapper) {
+		DataImporter data_importer = new DataImporter(folder_name, graph_wrapper);
+		data_importer.importPayload();
+	}
+	
+	private static void startDijkstraAsInfiniteLoop(GraphWrapper graph_wrapper) {
 		graph_wrapper.runEndlessTests();
 	}
 
@@ -50,5 +85,13 @@ public class Neo4jGraphAlgorithms {
 		System.out.println(graph_wrapper.runTestsWithTimer() + " ms");
 	}
 	
+	public static void startPayloadWithTimer(GraphWrapper graph_wrapper, int times) {
+		System.out.println("Age: " + graph_wrapper.runAgeQueryWithTimer(times) + " ms");
+		System.out.println("Name: " + graph_wrapper.runNameQueryWithTimer(times) + " ms");
+		System.out.println("Bio: " + graph_wrapper.runBioQueryWithTimer(times) + " ms");
+	}
 	
+	public static void startPayloadAsInfiniteLoop(GraphWrapper graph_wrapper) {
+		graph_wrapper.runNameQueryAsInfiniteLoop();
+	}
 }

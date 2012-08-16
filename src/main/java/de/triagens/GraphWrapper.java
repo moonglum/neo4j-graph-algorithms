@@ -18,15 +18,23 @@ import org.neo4j.graphdb.Node;
 import org.neo4j.graphdb.Relationship;
 import org.neo4j.graphdb.RelationshipExpander;
 import org.neo4j.graphdb.Transaction;
+import org.neo4j.graphdb.index.Index;
+import org.neo4j.graphdb.index.IndexManager;
+import org.neo4j.index.lucene.QueryContext;
+import org.neo4j.index.lucene.ValueContext;
 import org.neo4j.kernel.EmbeddedGraphDatabase;
 import org.neo4j.kernel.Traversal;
 
+@SuppressWarnings("deprecation")
 public class GraphWrapper {
 	GraphDatabaseService graphdb;
 	Transaction tx;
 	PathFinder<WeightedPath> dijkstraPathFinder;
 	Map<String,Long> vertex_mapper;
 	ArrayList<Node[]> test_cases;
+	Index<Node> name_index;
+	Index<Node> age_index;
+	Index<Node> bio_index;
 	
 	public GraphWrapper(String dbname) {
 		graphdb = new EmbeddedGraphDatabase(dbname);
@@ -37,13 +45,33 @@ public class GraphWrapper {
 		RelationshipExpander expander = Traversal.expanderForTypes(MyRelationshipType.REL, Direction.BOTH );
 		CostEvaluator<Double> costEvaluator = CommonEvaluators.doubleCostEvaluator( "cost" );
 		dijkstraPathFinder = GraphAlgoFactory.dijkstra( expander, costEvaluator );
+		
+		IndexManager index = graphdb.index();
+		name_index = index.forNodes("name");
+		age_index = index.forNodes("age");
+		bio_index = index.forNodes("bio");
 	}
 	
-	public Node addVertexWithName(String name) {
+	public Node addVertex(String name) {
 		Node vertex = graphdb.createNode();
 		vertex_mapper.put(name, vertex.getId());
-		
 		vertex.setProperty("name", name);
+		return vertex;
+	}
+	
+	public Node addVertex(String id, String name, Integer age, String bio) {
+		Node vertex = graphdb.createNode();
+		vertex_mapper.put(id, vertex.getId());
+		
+		vertex.setProperty("id", id);
+		vertex.setProperty("name", name.substring(1, name.length() - 1));
+		vertex.setProperty("age", age);
+		vertex.setProperty("bio", bio.substring(1, bio.length() - 1));
+		
+		name_index.add(vertex, "name", vertex.getProperty("name"));
+		age_index.add(vertex, "age", new ValueContext(vertex.getProperty("age")).indexNumeric());
+		bio_index.add(vertex, "bio", vertex.getProperty("bio"));
+		
 		return vertex;
 	}
 	
@@ -52,6 +80,7 @@ public class GraphWrapper {
 		Node to = graphdb.getNodeById(vertex_mapper.get(to_name));
 		
 		Relationship edge = from.createRelationshipTo(to, MyRelationshipType.REL);
+		
 		edge.setProperty("name", name);
 		edge.setProperty("cost", 1);
 		
@@ -120,6 +149,56 @@ public class GraphWrapper {
 		}
 		
 		return my_pathes;
+	}
+	
+	public long runAgeQueryWithTimer(int times) {
+		long start_time = System.currentTimeMillis();
+		
+		for (int i = 0; i < times; i += 1) {
+			for (Node node : age_index.query( QueryContext.numericRange("age", 20, 30))) {
+				node.getProperty("name");
+			}
+		}
+		
+		long end_time = System.currentTimeMillis();
+		
+		return (end_time - start_time);
+	}
+	
+	public long runNameQueryWithTimer(int times) {
+		long start_time = System.currentTimeMillis();
+		
+		for (int i = 0; i < times; i += 1) {
+			for (Node node : name_index.get( "name", "John Doe" )) {
+				node.getProperty("name");
+			}
+		}
+		
+		long end_time = System.currentTimeMillis();
+		
+		return (end_time - start_time);
+	}
+	
+	public void runNameQueryAsInfiniteLoop() {
+		while(true) {
+			for (Node node : name_index.get( "name", "John Doe" )) {
+				node.getProperty("name");
+			}
+		}
+	}
+	
+	public long runBioQueryWithTimer(int times) {
+		long start_time = System.currentTimeMillis();
+		
+		for (int i = 0; i < times; i += 1) {
+			for (Node node : bio_index.query("bio:[\"Qui \" TO \"Quia\"]")) {
+				node.getProperty("name");
+			}
+		}
+		
+		long end_time = System.currentTimeMillis();
+		
+		return (end_time - start_time);
 	}
 	
 	public void close() {
