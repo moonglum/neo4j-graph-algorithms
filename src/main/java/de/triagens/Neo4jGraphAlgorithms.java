@@ -7,18 +7,22 @@ import java.io.IOException;
 public class Neo4jGraphAlgorithms {
 
 	public static void main(String[] args) {
-		String type = args[0];
-		String task = args[1];
-		String folder_name = args[2];
-		GraphWrapper graph_wrapper = new GraphWrapper("/tmp/neo4j-graph-algorithms");
+		String type = args[0], task = args[1], folder_name = "";
 		int times = 1;
+		GraphWrapper graph_wrapper = new GraphWrapper("/tmp/neo4j-graph-algorithms");
+		
+		if (args.length > 2) {
+			folder_name = args[2];
+		}
 		
 		if (args.length == 4) {
 			times = Integer.parseInt(args[3]);
 		}
 		
-		System.out.println("Start: Import");
-		if (task.equals("dijkstra")) {
+	if (task.equals("nothing")) {
+		while (true);
+	} else if (task.equals("dijkstra")) {
+			System.out.println("Start: Import");
 			importEntireGraph(folder_name, graph_wrapper);
 			System.out.println("Start: Processing");
 			if (type.equals("infinite")) {
@@ -31,6 +35,7 @@ public class Neo4jGraphAlgorithms {
 				System.out.println("Abort! Unknown task type.");				
 			}
 		} else if (task.equals("payload")) {
+			System.out.println("Start: Import");
 			importVerticesWithPayload(folder_name, graph_wrapper);
 			System.out.println("Start: Processing");
 			if (type.equals("infinite")) {
